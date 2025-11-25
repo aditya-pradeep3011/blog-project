@@ -1,19 +1,16 @@
 package com.project.blog.domain;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,13 +19,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "T_USER")
+@Table(name = "T_CATEGORY")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class Category {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -37,29 +34,13 @@ public class User {
 	@Column(nullable = false)
 	private String name;
 	
-	@Column(nullable = false)
-	private String email;
-	
-	@Column(nullable = false)
-	private String password;
-	
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "author")
+	@OneToMany(mappedBy = "category")
 	@Builder.Default
 	private List<Post> posts = new ArrayList<>();
-	
-	@Column(nullable = false)
-	private LocalDateTime createdAt;
-	
-	@PrePersist
-	protected void onCreate()
-	{
-		LocalDateTime currDateTime = LocalDateTime.now();
-		this.createdAt = currDateTime;
-	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(createdAt, email, id, name, password, posts);
+		return Objects.hash(id, name, posts);
 	}
 
 	@Override
@@ -70,9 +51,7 @@ public class User {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		User other = (User) obj;
-		return Objects.equals(createdAt, other.createdAt) && Objects.equals(email, other.email)
-				&& Objects.equals(id, other.id) && Objects.equals(name, other.name)
-				&& Objects.equals(password, other.password) && Objects.equals(posts, other.posts);
+		Category other = (Category) obj;
+		return Objects.equals(id, other.id) && Objects.equals(name, other.name) && Objects.equals(posts, other.posts);
 	}
 }
