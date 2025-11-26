@@ -21,4 +21,14 @@ public class CategoryServiceImpl implements CategoryService {
 		return categoryRepository.findAllWithPostCount();
 	}
 
+	@Override
+	public Category addCategory(Category category) {
+		if(categoryRepository.existsByNameIgnoreCase(category.getName()))
+		{
+			throw new IllegalArgumentException("Category already exists!");
+		}
+		
+		return categoryRepository.save(category);
+	}
+
 }
