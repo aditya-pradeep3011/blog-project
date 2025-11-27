@@ -6,7 +6,7 @@ import com.project.blog.domain.Category;
 
 public interface CategoryService {
 
-	public List<Category> getAllCategories();
+	List<Category> getAllCategories();
 	
-	public Category addCategory(Category category);
+	Category addCategory(Category category);
 }
