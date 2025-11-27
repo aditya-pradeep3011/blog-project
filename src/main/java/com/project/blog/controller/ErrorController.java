@@ -2,6 +2,8 @@ package com.project.blog.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,5 +37,16 @@ public class ErrorController {
 				.code(400)
 				.build();
 		return new ResponseEntity<ApiErrorResponse>(response, HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(exception = BadCredentialsException.class)
+	public ResponseEntity<ApiErrorResponse> handleBadCredentialsException(BadCredentialsException e)
+	{
+		ApiErrorResponse response = ApiErrorResponse.builder()
+				.name("BadCredentialsException")
+				.message("Incorrect username or password!")
+				.code(401)
+				.build();
+		return new ResponseEntity<ApiErrorResponse>(response, HttpStatus.UNAUTHORIZED);
 	}
 }
