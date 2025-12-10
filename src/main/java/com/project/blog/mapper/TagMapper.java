@@ -18,8 +18,6 @@ public interface TagMapper {
 	@Mapping(target = "postCount", source = "posts", qualifiedByName = "calculatePostCount")
 	TagResponse toDto(Tag tag);
 	
-	Tag toEntity(TagResponse tagResponse);
-	
 	@Named("calculatePostCount")
 	default long calculatePostCount(List<Post> postsList)
 	{
