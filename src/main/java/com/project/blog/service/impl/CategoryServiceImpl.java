@@ -1,6 +1,8 @@
 package com.project.blog.service.impl;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -8,6 +10,7 @@ import com.project.blog.domain.Category;
 import com.project.blog.repo.CategoryRepository;
 import com.project.blog.service.CategoryService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -21,6 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
 		return categoryRepository.findAllWithPostCount();
 	}
 
+	@Transactional
 	@Override
 	public Category addCategory(Category category) {
 		if(categoryRepository.existsByNameIgnoreCase(category.getName()))
@@ -29,6 +33,23 @@ public class CategoryServiceImpl implements CategoryService {
 		}
 		
 		return categoryRepository.save(category);
+	}
+
+	@Transactional
+	@Override
+	public void deleteCategory(UUID id) {
+		
+		Optional<Category> category = categoryRepository.findById(id);
+		
+		if(category.isPresent())
+		{
+			if(!category.get().getPosts().isEmpty())
+			{
+				throw new IllegalStateException("Cannot delete a category that has posts associated with it!");
+			}
+			categoryRepository.delete(category.get());
+		}
+		
 	}
 
 }

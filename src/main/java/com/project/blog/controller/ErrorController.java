@@ -48,4 +48,15 @@ public class ErrorController {
 				.build();
 		return new ResponseEntity<ApiErrorResponse>(response, HttpStatus.UNAUTHORIZED);
 	}
+	
+	@ExceptionHandler(exception = IllegalStateException.class)
+	public ResponseEntity<ApiErrorResponse> handleIllegalStateException(IllegalStateException e)
+	{
+		ApiErrorResponse response = ApiErrorResponse.builder()
+				.name("IllegalStateException")
+				.message(e.getMessage())
+				.code(409)
+				.build();
+		return new ResponseEntity<ApiErrorResponse>(response, HttpStatus.CONFLICT);
+	}
 }
