@@ -6,12 +6,16 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.blog.domain.Post;
+import com.project.blog.dto.CreatePostRequest;
+import com.project.blog.dto.CreatePostRequestDto;
 import com.project.blog.dto.PostDto;
 import com.project.blog.mapper.PostMapper;
 import com.project.blog.service.PostService;
@@ -40,5 +44,14 @@ public class PostController {
 		List<Post> posts = postService.getAllDraftPosts(username);
 		List<PostDto> response = posts.stream().map(postMapper::toDto).toList();
 		return new ResponseEntity<List<PostDto>>(response, HttpStatus.OK);
+	}
+	
+	@PostMapping
+	public ResponseEntity<PostDto> createPost(@RequestBody CreatePostRequestDto createPostRequestDto, @RequestAttribute UUID username)
+	{
+		CreatePostRequest createPostRequest = postMapper.toCreatePostRequest(createPostRequestDto);
+	 	Post createdPost = postService.createPost(username, createPostRequest);
+	 	PostDto response = postMapper.toDto(createdPost);
+	 	return new ResponseEntity<PostDto>(response, HttpStatus.OK);
 	}
 }

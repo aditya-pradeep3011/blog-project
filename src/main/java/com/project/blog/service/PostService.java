@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.project.blog.domain.Post;
+import com.project.blog.dto.CreatePostRequest;
 
 public interface PostService {
 
@@ -11,4 +12,5 @@ public interface PostService {
 	
 	List<Post> getAllDraftPosts(UUID userId);
 	
+	Post createPost(UUID userId, CreatePostRequest createPostRequest);
 }
