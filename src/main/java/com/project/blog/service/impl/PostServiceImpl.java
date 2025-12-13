@@ -9,10 +9,12 @@ import com.project.blog.domain.Category;
 import com.project.blog.domain.Post;
 import com.project.blog.domain.PostStatus;
 import com.project.blog.domain.Tag;
+import com.project.blog.domain.User;
 import com.project.blog.repo.PostRepository;
 import com.project.blog.service.CategoryService;
 import com.project.blog.service.PostService;
 import com.project.blog.service.TagService;
+import com.project.blog.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +25,7 @@ public class PostServiceImpl implements PostService{
 	private final PostRepository postRepository;
 	private final CategoryService categoryService;
 	private final TagService tagService;
+	private final UserService userService;
 
 	@Override
 	public List<Post> getAllPosts(UUID categoryId, UUID tagId) {
@@ -46,6 +49,12 @@ public class PostServiceImpl implements PostService{
 		}
 		
 		return postRepository.findAllByPostStatus(PostStatus.PUBLISHED);
+	}
+
+	@Override
+	public List<Post> getAllDraftPosts(UUID userId) {
+		User loggedInUser = userService.getUserById(userId);
+		return postRepository.findAllByPostStatusAndAuthor(PostStatus.DRAFT, loggedInUser);
 	}
 
 }

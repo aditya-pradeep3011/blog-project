@@ -33,6 +33,7 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers(HttpMethod.POST, "/api/v1/auth").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/v1/category/**").permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/v1/post/draft").authenticated()
 				.requestMatchers(HttpMethod.GET, "/api/v1/post/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/v1/tag/**").permitAll()
 				.anyRequest().authenticated()

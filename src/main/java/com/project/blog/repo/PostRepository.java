@@ -10,6 +10,7 @@ import com.project.blog.domain.Category;
 import com.project.blog.domain.Post;
 import com.project.blog.domain.PostStatus;
 import com.project.blog.domain.Tag;
+import com.project.blog.domain.User;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, UUID> {
@@ -18,4 +19,5 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 	List<Post> findAllByPostStatusAndCategory(PostStatus status, Category category);
 	List<Post> findAllByPostStatusAndTagsContaining(PostStatus status, Tag tag);
 	List<Post> findAllByPostStatus(PostStatus status);
+	List<Post> findAllByPostStatusAndAuthor(PostStatus status, User author);
 }

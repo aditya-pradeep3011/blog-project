@@ -9,4 +9,6 @@ public interface PostService {
 
 	List<Post> getAllPosts(UUID categoryId, UUID tagId);
 	
+	List<Post> getAllDraftPosts(UUID userId);
+	
 }
