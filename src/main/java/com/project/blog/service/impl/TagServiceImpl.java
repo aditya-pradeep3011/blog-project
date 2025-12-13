@@ -13,6 +13,7 @@ import com.project.blog.domain.Tag;
 import com.project.blog.repo.TagRepository;
 import com.project.blog.service.TagService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -69,6 +70,11 @@ public class TagServiceImpl implements TagService{
 			tagRepository.delete(tag.get());
 		}
 		
+	}
+
+	@Override
+	public Tag findById(UUID id) {
+		return tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag with ID: "+id+" could not be found!"));
 	}
 
 }
