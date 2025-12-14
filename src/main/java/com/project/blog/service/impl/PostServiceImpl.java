@@ -3,6 +3,7 @@ package com.project.blog.service.impl;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -12,12 +13,14 @@ import com.project.blog.domain.PostStatus;
 import com.project.blog.domain.Tag;
 import com.project.blog.domain.User;
 import com.project.blog.dto.CreatePostRequest;
+import com.project.blog.dto.UpdatePostRequest;
 import com.project.blog.repo.PostRepository;
 import com.project.blog.service.CategoryService;
 import com.project.blog.service.PostService;
 import com.project.blog.service.TagService;
 import com.project.blog.service.UserService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -91,6 +94,31 @@ public class PostServiceImpl implements PostService{
 		int wordCount = content.trim().split("\\s+").length;
 		
 		return (int) Math.ceil((double)wordCount / WORDS_PER_MINUTE);
+	}
+
+	@Override
+	@Transactional
+	public Post updatePost(UUID postId, UpdatePostRequest updatePostRequest) {
+		Post existingPost = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post with ID: "+postId+" could not be found!"));
+		existingPost.setTitle(updatePostRequest.getTitle());
+		existingPost.setContent(updatePostRequest.getContent());
+		existingPost.setPostStatus(updatePostRequest.getPostStatus());
+		existingPost.setReadTime(calculateReadingTime(updatePostRequest.getContent()));
+		
+		if(!existingPost.getCategory().getId().equals(updatePostRequest.getCategoryId()))
+		{
+			Category category = categoryService.findById(updatePostRequest.getCategoryId());
+			existingPost.setCategory(category);
+		}
+		
+		Set<UUID> existingPostTagIds = existingPost.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
+		if(!updatePostRequest.getTagIds().equals(existingPostTagIds))
+		{
+			Set<Tag> tags = tagService.findAllByIds(updatePostRequest.getTagIds());
+			existingPost.setTags(tags);
+		}
+		
+		return postRepository.save(existingPost);
 	}
 
 }
