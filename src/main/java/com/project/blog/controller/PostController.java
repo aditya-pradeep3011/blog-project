@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -73,5 +74,12 @@ public class PostController {
 		Post post = postService.getPost(postId);
 		PostDto response = postMapper.toDto(post);
 		return new ResponseEntity<PostDto>(response, HttpStatus.OK);
+	}
+	
+	@DeleteMapping("{postId}")
+	public ResponseEntity<Void> deletePost(@PathVariable UUID postId)
+	{
+		postService.deletePost(postId);
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 }
