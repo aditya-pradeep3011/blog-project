@@ -121,4 +121,9 @@ public class PostServiceImpl implements PostService{
 		return postRepository.save(existingPost);
 	}
 
+	@Override
+	public Post getPost(UUID postId) {
+		return postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post with ID: "+postId+" could not be found"));
+	}
+
 }
