@@ -1,5 +1,8 @@
 package com.project.blog;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,8 +18,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.blog.domain.Category;
+import com.project.blog.domain.Tag;
 import com.project.blog.dto.CategoryRequest;
 import com.project.blog.service.CategoryService;
+import com.project.blog.service.TagService;
 import com.project.blog.util.TestDataUtil;
 
 @SpringBootTest
@@ -27,14 +32,16 @@ public class BlogUnitTests {
 
 	private MockMvc mockMvc;
 	private CategoryService categoryService;
+	private TagService tagService;
 	private ObjectMapper objectMapper;
 	
 	@Autowired
-	public BlogUnitTests(MockMvc mockMvc, CategoryService categoryService, ObjectMapper objectMapper)
+	public BlogUnitTests(MockMvc mockMvc, CategoryService categoryService, ObjectMapper objectMapper, TagService tagService)
 	{
 		this.mockMvc = mockMvc;
 		this.categoryService = categoryService;
 		this.objectMapper = objectMapper;
+		this.tagService = tagService;
 	}
 
 	@Test
@@ -82,5 +89,37 @@ public class BlogUnitTests {
 			   .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
 			   .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("TestCategoryA"));
 		
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatDeleteCategoryReturnsHttp204() throws Exception
+	{
+		Category category = TestDataUtil.createTestCategoryA();
+		categoryService.addCategory(category);
+		
+		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/category/"+category.getId()))
+			   .andExpect(MockMvcResultMatchers.status().isNoContent());
+		
+	}
+	
+	@Test
+	public void testThatGetAllTagsReturnsHttp200() throws Exception
+	{
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tag"))
+			   .andExpect(MockMvcResultMatchers.status().isOk());
+	}
+	
+	@Test
+	public void testThatGetAllTagsReturnsAllTags() throws Exception
+	{
+		Tag tag = TestDataUtil.createTestTagA();
+		Set<String> tagNames = new HashSet<>();
+		tagNames.add(tag.getName());
+		tagService.createTags(tagNames);
+		
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tag"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").isNotEmpty())
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("TestTagA"));
 	}
 }

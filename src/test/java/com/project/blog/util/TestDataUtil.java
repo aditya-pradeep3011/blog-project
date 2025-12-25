@@ -1,6 +1,7 @@
 package com.project.blog.util;
 
 import com.project.blog.domain.Category;
+import com.project.blog.domain.Tag;
 import com.project.blog.dto.CategoryRequest;
 
 public class TestDataUtil {
@@ -21,5 +22,14 @@ public class TestDataUtil {
 														 .build();
 		
 		return categoryRequest;
+	}
+	
+	public static Tag createTestTagA()
+	{
+		Tag tag = Tag.builder()
+					 .name("TestTagA")
+					 .build();
+		
+		return tag;
 	}
 }
