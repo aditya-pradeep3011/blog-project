@@ -1,6 +1,7 @@
 package com.project.blog;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.blog.domain.Category;
 import com.project.blog.domain.Tag;
 import com.project.blog.dto.CategoryRequest;
+import com.project.blog.dto.TagRequest;
 import com.project.blog.service.CategoryService;
 import com.project.blog.service.TagService;
 import com.project.blog.util.TestDataUtil;
@@ -121,5 +123,50 @@ public class BlogUnitTests {
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tag"))
 			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").isNotEmpty())
 			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("TestTagA"));
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatCreateTagReturnsHttp201() throws Exception
+	{
+		TagRequest tag = TestDataUtil.createTestTagRequestA();
+		String request = objectMapper.writeValueAsString(tag);
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/tag")
+											  .contentType(MediaType.APPLICATION_JSON)
+											  .content(request))
+			   .andExpect(MockMvcResultMatchers.status().isCreated());
+		
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatCreateTagReturnsCreatedTags() throws Exception
+	{
+		TagRequest tag = TestDataUtil.createTestTagRequestA();
+		String request = objectMapper.writeValueAsString(tag);
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/tag")
+											  .contentType(MediaType.APPLICATION_JSON)
+											  .content(request))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").isNotEmpty())
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("TestTagA"));
+		
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatDeleteTagReturnsHttp204() throws Exception
+	{
+		Tag tag = TestDataUtil.createTestTagA();
+		Set<String> tagNames = new HashSet<>();
+		tagNames.add(tag.getName());
+		tagService.createTags(tagNames);
+		
+		List<Tag> tags = tagService.getAllTags();
+		
+		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/tag/"+tags.get(0).getId()))
+			   .andExpect(MockMvcResultMatchers.status().isNoContent());
+		
 	}
 }

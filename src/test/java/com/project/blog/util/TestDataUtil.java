@@ -1,8 +1,12 @@
 package com.project.blog.util;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.project.blog.domain.Category;
 import com.project.blog.domain.Tag;
 import com.project.blog.dto.CategoryRequest;
+import com.project.blog.dto.TagRequest;
 
 public class TestDataUtil {
 
@@ -31,5 +35,17 @@ public class TestDataUtil {
 					 .build();
 		
 		return tag;
+	}
+	
+	public static TagRequest createTestTagRequestA()
+	{
+		Set<String> names = new HashSet<>();
+		names.add("TestTagA");
+		
+		TagRequest tagRequest = TagRequest.builder()
+										  .names(names)
+										  .build();
+		
+		return tagRequest;
 	}
 }
