@@ -3,6 +3,7 @@ package com.project.blog;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,16 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.blog.domain.Category;
+import com.project.blog.domain.Post;
 import com.project.blog.domain.Tag;
+import com.project.blog.domain.User;
 import com.project.blog.dto.CategoryRequest;
+import com.project.blog.dto.CreatePostRequest;
 import com.project.blog.dto.TagRequest;
 import com.project.blog.service.CategoryService;
+import com.project.blog.service.PostService;
 import com.project.blog.service.TagService;
+import com.project.blog.service.UserService;
 import com.project.blog.util.TestDataUtil;
 
 @SpringBootTest
@@ -36,14 +42,18 @@ public class BlogUnitTests {
 	private CategoryService categoryService;
 	private TagService tagService;
 	private ObjectMapper objectMapper;
+	private PostService postService;
+	private UserService userService;
 	
 	@Autowired
-	public BlogUnitTests(MockMvc mockMvc, CategoryService categoryService, ObjectMapper objectMapper, TagService tagService)
+	public BlogUnitTests(MockMvc mockMvc, CategoryService categoryService, ObjectMapper objectMapper, TagService tagService, PostService postService, UserService userService)
 	{
 		this.mockMvc = mockMvc;
 		this.categoryService = categoryService;
 		this.objectMapper = objectMapper;
 		this.tagService = tagService;
+		this.postService = postService;
+		this.userService = userService;
 	}
 
 	@Test
@@ -168,5 +178,48 @@ public class BlogUnitTests {
 		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/tag/"+tags.get(0).getId()))
 			   .andExpect(MockMvcResultMatchers.status().isNoContent());
 		
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatGetAllPostsReturnsHttp200() throws Exception
+	{
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/post"))
+			   .andExpect(MockMvcResultMatchers.status().isOk());
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatGetAllPostsReturnsAllPosts() throws Exception
+	{
+		Tag tag = TestDataUtil.createTestTagA();
+		Set<Tag> tags = new HashSet<>();
+		tags.add(tag);
+		tagService.createTags(tags.stream().map(Tag::getName).collect(Collectors.toSet()));
+		tags = tagService.getAllTags().stream().collect(Collectors.toSet());
+		
+		Category category = TestDataUtil.createTestCategoryA();
+		categoryService.addCategory(category);
+		
+		User user = TestDataUtil.createTestUserA();
+		userService.createUser(user);
+		
+		Post post = TestDataUtil.createTestPostA(tags, category, user);
+		CreatePostRequest createPostRequest = CreatePostRequest.builder()
+															   .title(post.getTitle())
+															   .content(post.getContent())
+															   .categoryId(post.getCategory().getId())
+															   .tagIds(post.getTags().stream().map(Tag::getId).collect(Collectors.toSet()))
+															   .postStatus(post.getPostStatus())
+															   .build();
+		postService.createPost(post.getAuthor().getId(), createPostRequest);
+		
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/post"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").isNotEmpty())
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].title").value("TestPostA"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].content").value("Contents of test post A..."))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].category.name").value("TestCategoryA"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].tags[0].name").value("TestTagA"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$[0].author.name").value("TestUserA"));
 	}
 }

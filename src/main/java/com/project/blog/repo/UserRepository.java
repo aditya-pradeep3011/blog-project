@@ -13,4 +13,6 @@ import com.project.blog.domain.User;
 public interface UserRepository extends JpaRepository<User, UUID>{
 
 	Optional<User> findByEmail(String email);
+	
+	boolean existsByNameIgnoreCase(String name);
 }

@@ -22,4 +22,13 @@ public class UserServiceImpl implements UserService{
 		return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User with ID: "+userId+" could not be found!"));
 	}
 
+	@Override
+	public User createUser(User user) {
+		if(userRepository.existsByNameIgnoreCase(user.getName()))
+		{
+			throw new IllegalArgumentException("User with name "+user.getName()+" already exists!");
+		}
+		return userRepository.save(user);
+	}
+
 }
