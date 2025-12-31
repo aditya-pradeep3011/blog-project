@@ -76,4 +76,18 @@ public class TestDataUtil {
 		
 		return post;
 	}
+	
+	public static Post createTestPostB(Set<Tag> tags, Category category, User user)
+	{
+		Post post = Post.builder()
+						.title("TestPostB")
+						.content("Contents of test post B...")
+						.author(user)
+						.category(category)
+						.tags(tags)
+						.postStatus(PostStatus.DRAFT)
+						.build();
+		
+		return post;
+	}
 }
