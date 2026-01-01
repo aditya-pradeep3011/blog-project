@@ -25,7 +25,9 @@ import com.project.blog.domain.Tag;
 import com.project.blog.domain.User;
 import com.project.blog.dto.CategoryRequest;
 import com.project.blog.dto.CreatePostRequest;
+import com.project.blog.dto.CreatePostRequestDto;
 import com.project.blog.dto.TagRequest;
+import com.project.blog.dto.UpdatePostRequestDto;
 import com.project.blog.service.CategoryService;
 import com.project.blog.service.PostService;
 import com.project.blog.service.TagService;
@@ -339,5 +341,175 @@ public class BlogUnitTests {
 			   .andExpect(MockMvcResultMatchers.jsonPath("$.category.name").value("TestCategoryA"))
 			   .andExpect(MockMvcResultMatchers.jsonPath("$.tags[0].name").value("TestTagA"))
 			   .andExpect(MockMvcResultMatchers.jsonPath("$.author.name").value("TestUserA"));
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatCreatePostReturnsHttp200() throws Exception
+	{
+		User user = TestDataUtil.createTestUserA();
+		userService.createUser(user);
+		
+		Tag tag = TestDataUtil.createTestTagA();
+		Set<Tag> tags = new HashSet<>();
+		tags.add(tag);
+		tagService.createTags(tags.stream().map(Tag::getName).collect(Collectors.toSet()));
+		tags = tagService.getAllTags().stream().collect(Collectors.toSet());
+		
+		Category category = TestDataUtil.createTestCategoryA();
+		categoryService.addCategory(category);
+		
+		CreatePostRequestDto createPostRequestDto = TestDataUtil.createTestCreatePostRequestDtoA(tags, category);
+		String request = objectMapper.writeValueAsString(createPostRequestDto);
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/post")
+											  .requestAttr("username", user.getId())
+											  .contentType(MediaType.APPLICATION_JSON)
+											  .content(request))
+			   .andExpect(MockMvcResultMatchers.status().isOk());
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatCreatePostReturnsCreatedPost() throws Exception
+	{
+		User user = TestDataUtil.createTestUserA();
+		userService.createUser(user);
+		
+		Tag tag = TestDataUtil.createTestTagA();
+		Set<Tag> tags = new HashSet<>();
+		tags.add(tag);
+		tagService.createTags(tags.stream().map(Tag::getName).collect(Collectors.toSet()));
+		tags = tagService.getAllTags().stream().collect(Collectors.toSet());
+		
+		Category category = TestDataUtil.createTestCategoryA();
+		categoryService.addCategory(category);
+		
+		CreatePostRequestDto createPostRequestDto = TestDataUtil.createTestCreatePostRequestDtoA(tags, category);
+		String request = objectMapper.writeValueAsString(createPostRequestDto);
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/post")
+											  .requestAttr("username", user.getId())
+											  .contentType(MediaType.APPLICATION_JSON)
+											  .content(request))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("Test Post A"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.content").value("Contents of test post A..."))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.category.name").value("TestCategoryA"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.tags[0].name").value("TestTagA"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.author.name").value("TestUserA"));
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatUpdatePostReturnsHttp200() throws Exception
+	{
+		User user = TestDataUtil.createTestUserA();
+		userService.createUser(user);
+		
+		Tag tag = TestDataUtil.createTestTagA();
+		Set<Tag> tags = new HashSet<>();
+		tags.add(tag);
+		tagService.createTags(tags.stream().map(Tag::getName).collect(Collectors.toSet()));
+		tags = tagService.getAllTags().stream().collect(Collectors.toSet());
+		
+		Category category = TestDataUtil.createTestCategoryA();
+		categoryService.addCategory(category);
+		
+		Post post = TestDataUtil.createTestPostA(tags, category, user);
+		CreatePostRequest createPostRequest = CreatePostRequest.builder()
+															   .title(post.getTitle())
+															   .content(post.getContent())
+															   .categoryId(post.getCategory().getId())
+															   .tagIds(post.getTags().stream().map(Tag::getId).collect(Collectors.toSet()))
+															   .postStatus(post.getPostStatus())
+															   .build();
+		postService.createPost(post.getAuthor().getId(), createPostRequest);
+		
+		List<Post> posts = postService.getAllPosts(null, null);
+		
+		UpdatePostRequestDto updatePostRequestDto = TestDataUtil.createTestUpdatePostRequestDtoA(tags, category);
+		String request = objectMapper.writeValueAsString(updatePostRequestDto);
+		
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/post/"+posts.get(0).getId())
+											  .requestAttr("username", user.getId())
+											  .contentType(MediaType.APPLICATION_JSON)
+											  .content(request))
+			   .andExpect(MockMvcResultMatchers.status().isOk());
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatUpdatePostReturnsUpdatedPost() throws Exception
+	{
+		User user = TestDataUtil.createTestUserA();
+		userService.createUser(user);
+		
+		Tag tag = TestDataUtil.createTestTagA();
+		Set<Tag> tags = new HashSet<>();
+		tags.add(tag);
+		tagService.createTags(tags.stream().map(Tag::getName).collect(Collectors.toSet()));
+		tags = tagService.getAllTags().stream().collect(Collectors.toSet());
+		
+		Category category = TestDataUtil.createTestCategoryA();
+		categoryService.addCategory(category);
+		
+		Post post = TestDataUtil.createTestPostA(tags, category, user);
+		CreatePostRequest createPostRequest = CreatePostRequest.builder()
+															   .title(post.getTitle())
+															   .content(post.getContent())
+															   .categoryId(post.getCategory().getId())
+															   .tagIds(post.getTags().stream().map(Tag::getId).collect(Collectors.toSet()))
+															   .postStatus(post.getPostStatus())
+															   .build();
+		postService.createPost(post.getAuthor().getId(), createPostRequest);
+		
+		List<Post> posts = postService.getAllPosts(null, null);
+		
+		UpdatePostRequestDto updatePostRequestDto = TestDataUtil.createTestUpdatePostRequestDtoA(tags, category);
+		String request = objectMapper.writeValueAsString(updatePostRequestDto);
+		
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/post")
+											  .requestAttr("username", user.getId())
+											  .contentType(MediaType.APPLICATION_JSON)
+											  .content(request))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.title").value("Test Post A modified"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.content").value("Contents of modified test post A..."))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.category.name").value("TestCategoryA"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.tags[0].name").value("TestTagA"))
+			   .andExpect(MockMvcResultMatchers.jsonPath("$.author.name").value("TestUserA"));
+	}
+	
+	@Test
+	@WithMockUser(username = "adminUser", authorities = {"ROLE_USER"})
+	public void testThatDeletePostReturnsHttp200() throws Exception
+	{
+		User user = TestDataUtil.createTestUserA();
+		userService.createUser(user);
+		
+		Tag tag = TestDataUtil.createTestTagA();
+		Set<Tag> tags = new HashSet<>();
+		tags.add(tag);
+		tagService.createTags(tags.stream().map(Tag::getName).collect(Collectors.toSet()));
+		tags = tagService.getAllTags().stream().collect(Collectors.toSet());
+		
+		Category category = TestDataUtil.createTestCategoryA();
+		categoryService.addCategory(category);
+		
+		Post post = TestDataUtil.createTestPostA(tags, category, user);
+		CreatePostRequest createPostRequest = CreatePostRequest.builder()
+															   .title(post.getTitle())
+															   .content(post.getContent())
+															   .categoryId(post.getCategory().getId())
+															   .tagIds(post.getTags().stream().map(Tag::getId).collect(Collectors.toSet()))
+															   .postStatus(post.getPostStatus())
+															   .build();
+		postService.createPost(post.getAuthor().getId(), createPostRequest);
+		
+		List<Post> posts = postService.getAllPosts(null, null);
+		
+		mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/post/"+posts.get(0).getId()))
+			   .andExpect(MockMvcResultMatchers.status().isNoContent());
 	}
 }

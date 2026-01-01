@@ -2,6 +2,7 @@ package com.project.blog.util;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.project.blog.domain.Category;
 import com.project.blog.domain.Post;
@@ -9,7 +10,9 @@ import com.project.blog.domain.PostStatus;
 import com.project.blog.domain.Tag;
 import com.project.blog.domain.User;
 import com.project.blog.dto.CategoryRequest;
+import com.project.blog.dto.CreatePostRequestDto;
 import com.project.blog.dto.TagRequest;
+import com.project.blog.dto.UpdatePostRequestDto;
 
 public class TestDataUtil {
 
@@ -89,5 +92,31 @@ public class TestDataUtil {
 						.build();
 		
 		return post;
+	}
+	
+	public static CreatePostRequestDto createTestCreatePostRequestDtoA(Set<Tag> tags, Category category)
+	{
+		CreatePostRequestDto createPostRequestDto = CreatePostRequestDto.builder()
+																		.categoryId(category.getId())
+																		.content("Contents of test post A...")
+																		.postStatus(PostStatus.PUBLISHED)
+																		.tagIds(tags.stream().map(Tag::getId).collect(Collectors.toSet()))
+																		.title("Test Post A")
+																		.build();
+		
+		return createPostRequestDto;
+	}
+	
+	public static UpdatePostRequestDto createTestUpdatePostRequestDtoA(Set<Tag> tags, Category category)
+	{
+		UpdatePostRequestDto updatePostRequestDto = UpdatePostRequestDto.builder()
+																		.categoryId(category.getId())
+																		.content("Contents of modified test post A...")
+																		.postStatus(PostStatus.PUBLISHED)
+																		.tagIds(tags.stream().map(Tag::getId).collect(Collectors.toSet()))
+																		.title("Test Post A modified")
+																		.build();
+		
+		return updatePostRequestDto;
 	}
 }
